@@ -1,0 +1,4 @@
+npm install
+make
+cd build && node server-bundle.js
+
