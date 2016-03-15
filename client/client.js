@@ -27,7 +27,10 @@ class Output extends React.Component {
 class Input extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {input: "", checked: false};
+    this.state = {
+      input: "",
+      checked: false
+    };
   }
 
   componentDidMount() {
@@ -40,7 +43,10 @@ class Input extends React.Component {
   }
 
   onCheckboxChange(event) {
-    this.setState({checked: event.target.checked});
+    let input = findDOMNode(this.refs.input);
+    this.setState({
+      checked: event.target.checked,
+      input: input.value});
   }
 
   onSwitch(event) {
@@ -57,7 +63,7 @@ class Input extends React.Component {
 
   render() {
     let actualInput = null;
-    if (this.state.checked) {
+    if (! this.state.checked) {
       actualInput = <textarea
         style={{
           width: "85%",
@@ -65,6 +71,7 @@ class Input extends React.Component {
           verticalAlign: "middle"
         }}
         ref="input"
+        value={ this.state.input }
         onChange={ this.onChange.bind(this) }
         />;
     } else {
@@ -74,6 +81,7 @@ class Input extends React.Component {
           verticalAlign: "middle"
         }}
         ref="input"
+        value={ this.state.input }
         onChange={ this.onChange.bind(this) }
         />;
     }
@@ -92,6 +100,7 @@ class Input extends React.Component {
         <input
           type="checkbox"
           checked={ this.state.checked }
+          title="Send on return or enter"
           style={{
             verticalAlign: "middle"
           }}
@@ -109,26 +118,77 @@ class Input extends React.Component {
 }
 
 class Screen extends React.Component {
+  componentDidMount() {
+    window.addEventListener(
+      "scroll", this.onScroll);
+  }
+
+  onScroll() {
+    if (state.scrollIgnored) {
+      state.nextScrollIgnored();
+      return;
+    }
+    if (state.lockScroll()) {
+      setTimeout(() => {
+        state.unlockScroll();
+      }, 5000);
+    }
+  }
+
   render() {
     return <div>
       <Output loglines={ this.props.loglines } />
       <div>&nbsp;</div>
       <div>&nbsp;</div>
-      <div>&nbsp;</div>
-      <div>&nbsp;</div>
+      <div id="bottom">&nbsp;</div>
       <Input send={ this.props.send }/>
     </div>;
   }
 }
 
-let loglines = [];
+class State {
+  constructor() {
+    this.loglines = [];
+    this.scrollLocked = false;
+    this.scrollIgnored = false;
+  }
+
+  log(logline) {
+    this.loglines.push(logline);
+    draw();
+  }
+
+  lockScroll() {
+    let wasLocked = this.scrollLocked;
+    this.scrollLocked = true;
+    return !wasLocked;
+  }
+
+  unlockScroll() {
+    this.scrollLocked = false;
+  }
+
+  ignoreNextScroll() {
+    this.scrollIgnored = true;
+  }
+
+  nextScrollIgnored() {
+    this.scrollIgnored = false;
+  }
+}
+
+let state = new State();
 
 function draw() {
   render(
     <Screen
-      loglines={ loglines }
+      loglines={ state.loglines }
       send={ send } />,
     document.getElementById("react-root"));
+  if (!state.scrollLocked) {
+    state.ignoreNextScroll();
+    document.getElementById("bottom").scrollIntoView();
+  }
 }
 
 
@@ -145,21 +205,22 @@ let send = null;
 
 async function main() {
   let socket = await open();
+  socket.send(location.hash.slice(1));
   send = (data) => {
     let prefix = "> ";
     for (let line of data.split("\n")) {
-      loglines.push(prefix + line);
+      state.log(prefix + line);
       if (prefix === "> ") {
         prefix = "  ";
       }
     }
-    draw();
     socket.send(data);
   };
-  draw();
   socket.on("message", (data) => {
-    loglines.push(data.toString());
-    draw();
+    state.log(data.toString());
+  });
+  socket.on("close", () => {
+    state.log("*** Disconnected ***");
   });
 }
 
