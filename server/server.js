@@ -3,6 +3,7 @@ import "babel-polyfill";
 import { Server } from "engine.io";
 import { connect } from "net";
 import { createServer } from "http";
+import { dirname, join } from "path";
 
 let express = require("express"),
   app = express(),
@@ -10,7 +11,9 @@ let express = require("express"),
   engine = Server();
 console.log("Server listening on localhost:8080");
 
-app.use(express.static(__dirname + "static"));
+let clientdir = join(dirname(__dirname), "client");
+console.log("clientdir", clientdir);
+app.use(express.static(clientdir));
 
 engine.attach(server);
 engine.on("connection", handleConnection);

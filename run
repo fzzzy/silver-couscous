@@ -1,4 +1,6 @@
 npm install
 make
-cd build && node server-bundle.js
 
+#cd build/server && DEBUG=express:* node server-bundle.js
+
+cd build/server && node server-bundle.js
