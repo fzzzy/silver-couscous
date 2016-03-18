@@ -1,14 +1,19 @@
 
 import "babel-polyfill";
-import { Server } from "node-static";
-import { attach } from "engine.io";
+import { Server } from "engine.io";
 import { connect } from "net";
+import { createServer } from "http";
 
-let files = new Server(".");
+let express = require("express"),
+  app = express(),
+  server = createServer(app).listen(8080),
+  engine = Server();
+console.log("Server listening on localhost:8080");
 
-let http = require("http").createServer((req, res) => {
-  files.serve(req, res);
-});
+app.use(express.static(__dirname + "static"));
+
+engine.attach(server);
+engine.on("connection", handleConnection);
 
 function openBridge() {
   return new Promise((resolve, reject) => {
@@ -39,9 +44,3 @@ async function handleConnection(websock) {
     bridge.end();
   });
 }
-
-attach(http).on("connection", handleConnection);
-
-http.listen(8080);
-
-console.log("Server listening on localhost:8080");

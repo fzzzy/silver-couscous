@@ -221,6 +221,8 @@ async function main() {
   });
   socket.on("close", () => {
     state.log("*** Disconnected ***");
+    send = null;
+    socket = null;
   });
 }
 

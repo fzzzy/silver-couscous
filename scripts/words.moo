@@ -51,6 +51,7 @@ move(player, #2);
 
 ;create(#1)
 ;#5.name = "Player"
+chparent(#3, #5)
 
 ;create(#5)
 ;#6.name = "Player 1"
@@ -77,9 +78,11 @@ endfor
 notify(player, "Sorry, the server is full.");
 .
 
-;add_verb(#3, {#3, "x", "look"}, {"none", "none", "none"})
+;add_verb(#5, {#5, "x", "look"}, {"any", "none", "none"})
 
-.program #3:look
+.program #5:look
+notify(player, "asdf");
+notify(player, dobjstr);
 for x in (#2.contents)
   if (x != #6)
     notify(player, toliteral(x));
