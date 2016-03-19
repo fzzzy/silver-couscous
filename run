@@ -1,4 +1,3 @@
-npm install
 make
 
 #cd build/server && DEBUG=express:* node server-bundle.js

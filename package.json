@@ -4,6 +4,7 @@
     "url": "https://donovanpreston.com"
   },
   "dependencies": {
+    "axios": "0.9.1",
     "babel-cli": "6.6.4",
     "babel-core": "6.7.0",
     "babel-loader": "6.2.4",
@@ -15,7 +16,11 @@
     "engine.io": "1.6.8",
     "engine.io-client": "1.6.8",
     "express": "4.13.4",
+    "morgan": "1.7.0",
     "react": "0.14.7",
+    "react-dnd": "2.1.2",
+    "react-dnd-touch-backend": "0.2.4",
+    "react-dnd-html5-backend": "2.1.2",
     "react-dom": "0.14.7",
     "redux": "3.3.1",
     "react-redux": "4.4.1",
