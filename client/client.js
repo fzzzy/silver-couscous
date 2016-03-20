@@ -19,7 +19,8 @@ const TILE_STYLES = {
   width: "16px",
   border: "1px solid #ababab",
   marginRight: "1em",
-  textAlign: "center"
+  textAlign: "center",
+  fontSize: "9pt"
 };
 
 
@@ -62,6 +63,15 @@ class Target extends React.Component {
       backgroundColor = 'darkkhaki';
     }
 
+    let text = this.props.text;
+    if (text === 0) {
+      text = "";
+    }
+    let color = "black";
+    if (this.props.backgroundColor === "black") {
+      color = "white";
+    }
+
     return connectDropTarget(
       <span style={{
         display: "inline-block",
@@ -69,9 +79,13 @@ class Target extends React.Component {
         width: "16px",
         margin: "3px",
         border: "1px solid black",
-        backgroundColor: backgroundColor
+        backgroundColor: backgroundColor,
+        color: color,
+        textAlign: "center",
+        verticalAlign: "middle",
+        fontSize: "8pt"
       }}>
-        &nbsp;
+        { text }
       </span>
     );
   }
@@ -210,6 +224,13 @@ class Player extends React.Component {
         Tiles:
       </span>
       { hand }
+      <button onClick={(event) => {
+          event.preventDefault();
+          this.props.send("end_turn");
+          console.log("ONCLICKPLAY");
+      }}>
+        Play
+      </button>
     </div>;
   }
 }
@@ -230,6 +251,7 @@ class World extends React.Component {
           backgroundColor = "black";
         }
         row.push(<Target
+          text={ this.props.tiles[y][x] }
           onDrop={ (item) => {
             console.log("it is dropped", item, x, y);
             this.props.send(
@@ -381,7 +403,10 @@ class Screen extends React.Component {
     let player = null,
         world = null;
     if (this.props.me) {
-      player = <Player me={ this.props.me } hand={ this.props.hand }/>;
+      player = <Player
+        me={ this.props.me }
+        hand={ this.props.hand }
+        send={ this.props.send }/>;
       world = <World
         here={ this.props.here }
         tiles={ this.props.tiles }
@@ -392,7 +417,6 @@ class Screen extends React.Component {
       { player }
       { world }
       <Scripts send={ this.props.send } />
-      <Target onDrop={ (item) => { console.log('ondrop', item) } }/>
       { output }
       <div>&nbsp;</div>
       <div>&nbsp;</div>
